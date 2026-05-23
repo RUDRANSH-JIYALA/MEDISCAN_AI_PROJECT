@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MediScan AI — Brain · Cardiac · Prostate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- Chart.js for clinical analytics dashboard panels -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ═══ LOADING SCREEN ═══ -->
+<div class="loading-screen" id="loading-screen">
+  <div class="loading-content">
+    <div class="loading-logo">
+      <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="40" cy="40" r="36" stroke="url(#lg1)" stroke-width="3"/>
+        <path d="M24 40c0-8.8 7.2-16 16-16s16 7.2 16 16-7.2 16-16 16" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="40" cy="40" r="6" fill="url(#lg2)"/>
+        <path d="M16 40h8M56 40h8M40 16v8M40 56v8" stroke="#7b2ff7" stroke-width="2" stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="lg1" x1="0" y1="0" x2="80" y2="80"><stop stop-color="#00d4ff"/><stop offset="1" stop-color="#7b2ff7"/></linearGradient>
+          <linearGradient id="lg2" x1="34" y1="34" x2="46" y2="46"><stop stop-color="#00d4ff"/><stop offset="1" stop-color="#7b2ff7"/></linearGradient>
+        </defs>
+      </svg>
+    </div>
+    <div class="loading-title">MediScan AI</div>
+    <div class="loading-bar-wrap"><div class="loading-bar" id="loading-bar"></div></div>
+    <div class="loading-text" id="loading-text">Initializing system...</div>
+  </div>
+</div>
+
+<!-- ═══ MAIN APP ═══ -->
+<div class="app hidden" id="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar" style="display:none">
+    <div class="sidebar-logo">
+      <svg width="32" height="32" viewBox="0 0 80 80" fill="none">
+        <circle cx="40" cy="40" r="36" stroke="url(#slg)" stroke-width="3"/>
+        <path d="M24 40c0-8.8 7.2-16 16-16s16 7.2 16 16-7.2 16-16 16" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="40" cy="40" r="6" fill="url(#slg2)"/>
+        <defs>
+          <linearGradient id="slg" x1="0" y1="0" x2="80" y2="80"><stop stop-color="#00d4ff"/><stop offset="1" stop-color="#7b2ff7"/></linearGradient>
+          <linearGradient id="slg2" x1="34" y1="34" x2="46" y2="46"><stop stop-color="#00d4ff"/><stop offset="1" stop-color="#7b2ff7"/></linearGradient>
+        </defs>
+      </svg>
+      <div class="sidebar-logo-text">
+        <span class="logo-main">MediScan AI</span>
+        <span class="logo-sub">Deep Learning MRI</span>
+      </div>
+    </div>
+
+    <div class="sidebar-user-mini">
+      <div class="avatar-mini" id="avatar-mini">?</div>
+      <div>
+        <div class="user-mini-name" id="user-mini-name">Patient</div>
+        <div class="user-mini-tag">Active Session</div>
+      </div>
+    </div>
+
+    <ul class="nav-links">
+      <li><a href="#" class="nav-link" data-page="dashboard"><span class="nav-icon">🏠</span> Dashboard</a></li>
+      <li><a href="#" class="nav-link" data-page="upload"><span class="nav-icon">📤</span> Upload MRI</a></li>
+      <li><a href="#" class="nav-link" data-page="results"><span class="nav-icon">🔬</span> Results</a></li>
+      <li><a href="#" class="nav-link" data-page="report"><span class="nav-icon">📄</span> Report</a></li>
+      <li><a href="#" class="nav-link" data-page="chatbot"><span class="nav-icon">🤖</span> AI Assistant</a></li>
+      <li><a href="#" class="nav-link" data-page="about"><span class="nav-icon">ℹ️</span> About</a></li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <div class="disclaimer-badge">⚕️ Decision-support and screening tool, not a medical replacement</div>
+      <button class="btn-logout" id="btn-logout">🚪 Sign Out</button>
+    </div>
+  </div>
+
+  <!-- SIDEBAR OVERLAY (mobile) -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- TOPBAR -->
+  <div class="topbar" style="display:none">
+    <button class="hamburger" id="hamburger">☰</button>
+    <div class="topbar-title" id="topbar-title">MediScan AI</div>
+    <div class="topbar-right">
+      <div class="notification-bell">🔔<span class="notif-dot"></span></div>
+      <div class="avatar-top" id="avatar-top">?</div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+
+    <!-- ════════════════════════════
+         PAGE: LOGIN
+    ════════════════════════════ -->
+    <div id="page-login" class="page active">
+      <div class="login-container">
+
+        <!-- LEFT PANEL -->
+        <div class="login-left">
+          <div class="login-left-content">
+            <div class="login-logo-wrap">
+              <svg width="48" height="48" viewBox="0 0 80 80" fill="none">
+                <circle cx="40" cy="40" r="36" stroke="url(#llg)" stroke-width="3"/>
+                <path d="M24 40c0-8.8 7.2-16 16-16s16 7.2 16 16-7.2 16-16 16" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round"/>
+                <circle cx="40" cy="40" r="6" fill="url(#llg2)"/>
+                <defs>
+                  <linearGradient id="llg" x1="0" y1="0" x2="80" y2="80"><stop stop-color="#00d4ff"/><stop offset="1" stop-color="#7b2ff7"/></linearGradient>
+                  <linearGradient id="llg2" x1="34" y1="34" x2="46" y2="46"><stop stop-color="#00d4ff"/><stop offset="1" stop-color="#7b2ff7"/></linearGradient>
+                </defs>
+              </svg>
+              <div>
+                <div class="login-brand">MediScan AI</div>
+                <div class="login-brand-sub">Deep Learning MRI Platform</div>
+              </div>
+            </div>
+            <h1 class="login-headline">AI-Powered<br/>MRI Segmentation</h1>
+            <p class="login-desc">Advanced deep learning segmentation for Brain, Cardiac, and Prostate MRI scans using DeepLabV3+ with ResNet-50 backbone — achieving Dice scores up to 0.9935.</p>
+            <div class="feature-pills">
+              <span class="pill">🧠 Brain MRI</span>
+              <span class="pill">❤️ Cardiac MRI</span>
+              <span class="pill">🔵 Prostate MRI</span>
+              <span class="pill">⚡ Real-time Analysis</span>
+              <span class="pill">📊 Dice: 0.9935</span>
+            </div>
+            <div class="model-badges">
+              <span class="model-badge">DeepLabV3+</span>
+              <span class="model-badge">ResNet-50</span>
+              <span class="model-badge">ASPP</span>
+            </div>
+            <div class="disclaimer-box">
+              <span class="disclaimer-icon">⚕️</span>
+              <p>Decision-support and screening tool, not a medical replacement</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT PANEL — AUTH FORMS -->
+        <div class="login-right">
+          <div class="login-card">
+
+            <!-- Auth Tab Switcher -->
+            <div class="auth-tabs" id="auth-tabs">
+              <button class="auth-tab active" id="tab-signin" onclick="switchAuthTab('signin')">Sign In</button>
+              <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Register</button>
+            </div>
+
+            <!-- ── SIGN IN ── -->
+            <div class="auth-panel" id="auth-signin">
+              <p class="login-card-sub">Welcome back! Enter your credentials to continue.</p>
+              <form id="signin-form" class="login-form" autocomplete="on">
+                <div class="form-group">
+                  <label class="form-label" for="si-username">Username</label>
+                  <div class="input-wrap">
+                    <span class="input-icon">👤</span>
+                    <input class="form-input" id="si-username" type="text" placeholder="Enter your username" autocomplete="username"/>
+                  </div>
+                  <div class="field-error" id="err-si-username"></div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="si-password">Password</label>
+                  <div class="input-wrap password-wrap">
+                    <span class="input-icon">🔒</span>
+                    <input class="form-input" id="si-password" type="password" placeholder="Enter your password" autocomplete="current-password"/>
+                    <button type="button" class="btn-toggle-pw" onclick="togglePw('si-password', this)" title="Show/hide password">👁️</button>
+                  </div>
+                  <div class="field-error" id="err-si-password"></div>
+                </div>
+                <div class="form-group" style="align-items:flex-end">
+                  <button type="button" class="link-btn" onclick="switchAuthTab('forgot')">Forgot password?</button>
+                </div>
+                <button class="btn-primary btn-full" type="submit">
+                  Sign In <span class="btn-arrow">→</span>
+                </button>
+              </form>
+              <p class="auth-switch-hint">Don't have an account? <button class="link-btn" onclick="switchAuthTab('register')">Register here</button></p>
+            </div>
+
+            <!-- ── REGISTER ── -->
+            <div class="auth-panel" id="auth-register" style="display:none">
+              <p class="login-card-sub">Create your MediScan AI account.</p>
+              <form id="register-form" class="login-form" autocomplete="on">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="reg-username">Username *</label>
+                    <div class="input-wrap">
+                      <span class="input-icon">👤</span>
+                      <input class="form-input" id="reg-username" type="text" placeholder="Choose a username" autocomplete="username"/>
+                    </div>
+                    <div class="field-error" id="err-reg-username"></div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="reg-name">Full Name *</label>
+                    <div class="input-wrap">
+                      <span class="input-icon">🧑</span>
+                      <input class="form-input" id="reg-name" type="text" placeholder="Full name" autocomplete="name"/>
+                    </div>
+                    <div class="field-error" id="err-reg-name"></div>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="reg-age">Age *</label>
+                    <div class="input-wrap">
+                      <span class="input-icon">🎂</span>
+                      <input class="form-input" id="reg-age" type="number" placeholder="Age" min="1" max="120" autocomplete="off"/>
+                    </div>
+                    <div class="field-error" id="err-reg-age"></div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="reg-gender">Gender *</label>
+                    <div class="input-wrap">
+                      <span class="input-icon">⚧</span>
+                      <select class="form-input form-select" id="reg-gender">
+                        <option value="">Select gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                        <option value="Prefer not to say">Prefer not to say</option>
+                      </select>
+                    </div>
+                    <div class="field-error" id="err-reg-gender"></div>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="reg-email">Email *</label>
+                    <div class="input-wrap">
+                      <span class="input-icon">✉️</span>
+                      <input class="form-input" id="reg-email" type="email" placeholder="email@example.com" autocomplete="email"/>
+                    </div>
+                    <div class="field-error" id="err-reg-email"></div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="reg-phone">Phone (optional)</label>
+                    <div class="input-wrap">
+                      <span class="input-icon">📱</span>
+                      <input class="form-input" id="reg-phone" type="tel" placeholder="+91 XXXXX XXXXX" autocomplete="tel"/>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="reg-password">Password *</label>
+                    <div class="input-wrap password-wrap">
+                      <span class="input-icon">🔒</span>
+                      <input class="form-input" id="reg-password" type="password" placeholder="Min 6 characters" autocomplete="new-password"/>
+                      <button type="button" class="btn-toggle-pw" onclick="togglePw('reg-password', this)" title="Show/hide">👁️</button>
+                    </div>
+                    <div class="field-error" id="err-reg-password"></div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="reg-confirm">Confirm Password *</label>
+                    <div class="input-wrap password-wrap">
+                      <span class="input-icon">🔒</span>
+                      <input class="form-input" id="reg-confirm" type="password" placeholder="Repeat password" autocomplete="new-password"/>
+                      <button type="button" class="btn-toggle-pw" onclick="togglePw('reg-confirm', this)" title="Show/hide">👁️</button>
+                    </div>
+                    <div class="field-error" id="err-reg-confirm"></div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="consent-wrap">
+                    <input class="consent-check" type="checkbox" id="reg-consent"/>
+                    <label class="consent-label" for="reg-consent">Decision-support and screening tool, not a medical replacement.</label>
+                  </div>
+                  <div class="field-error" id="err-reg-consent"></div>
+                </div>
+                <button class="btn-primary btn-full" type="submit">
+                  Create Account <span class="btn-arrow">→</span>
+                </button>
+              </form>
+              <p class="auth-switch-hint">Already have an account? <button class="link-btn" onclick="switchAuthTab('signin')">Sign in here</button></p>
+            </div>
+
+            <!-- ── FORGOT PASSWORD ── -->
+            <div class="auth-panel" id="auth-forgot" style="display:none">
+              <div class="forgot-back-row">
+                <button class="link-btn" onclick="switchAuthTab('signin')">← Back to Sign In</button>
+              </div>
+              <h3 class="login-card-title">Reset Password</h3>
+              <p class="login-card-sub">Enter your username and choose a new password. Your new password must be different from the old one.</p>
+              <form id="forgot-form" class="login-form">
+                <div class="form-group">
+                  <label class="form-label" for="fp-username">Username</label>
+                  <div class="input-wrap">
+                    <span class="input-icon">👤</span>
+                    <input class="form-input" id="fp-username" type="text" placeholder="Your registered username"/>
+                  </div>
+                  <div class="field-error" id="err-fp-username"></div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="fp-newpw">New Password</label>
+                  <div class="input-wrap password-wrap">
+                    <span class="input-icon">🔒</span>
+                    <input class="form-input" id="fp-newpw" type="password" placeholder="New password (min 6 chars)"/>
+                    <button type="button" class="btn-toggle-pw" onclick="togglePw('fp-newpw', this)" title="Show/hide">👁️</button>
+                  </div>
+                  <div class="field-error" id="err-fp-newpw"></div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="fp-confirmpw">Confirm New Password</label>
+                  <div class="input-wrap password-wrap">
+                    <span class="input-icon">🔒</span>
+                    <input class="form-input" id="fp-confirmpw" type="password" placeholder="Repeat new password"/>
+                    <button type="button" class="btn-toggle-pw" onclick="togglePw('fp-confirmpw', this)" title="Show/hide">👁️</button>
+                  </div>
+                  <div class="field-error" id="err-fp-confirmpw"></div>
+                </div>
+                <button class="btn-primary btn-full" type="submit">
+                  Reset Password <span class="btn-arrow">→</span>
+                </button>
+              </form>
+            </div>
+
+          </div><!-- /login-card -->
+        </div><!-- /login-right -->
+
+      </div><!-- /login-container -->
+    </div><!-- /page-login -->
+
+
+    <!-- ════════════════════════════
+         PAGE: DASHBOARD
+    ════════════════════════════ -->
+    <div id="page-dashboard" class="page">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Welcome, <span id="dash-name">Patient</span> 👋</h1>
+          <p class="page-sub">Your MRI analysis dashboard — all results and activity in one place.</p>
+        </div>
+        <button class="btn-primary" id="dash-upload-btn">📤 New Scan</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card stat-blue">
+          <div class="stat-icon">🔬</div>
+          <div><div class="stat-value" id="stat-scans">0</div><div class="stat-label">Total Scans</div></div>
+        </div>
+        <div class="stat-card stat-purple">
+          <div class="stat-icon">🧠</div>
+          <div><div class="stat-value" id="stat-brain">0</div><div class="stat-label">Brain MRI</div></div>
+        </div>
+        <div class="stat-card stat-red">
+          <div class="stat-icon">❤️</div>
+          <div><div class="stat-value" id="stat-heart">0</div><div class="stat-label">Cardiac MRI</div></div>
+        </div>
+        <div class="stat-card stat-green">
+          <div class="stat-icon">🔵</div>
+          <div><div class="stat-value" id="stat-prostate">0</div><div class="stat-label">Prostate MRI</div></div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <h3>Recent Activity</h3>
+            <span class="badge-live">● Live</span>
+          </div>
+          <div id="activity-list"></div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-header"><h3>System Status</h3></div>
+          <div class="system-status-list">
+            <div class="status-item"><span class="status-dot dot-green"></span>Brain Model (DeepLabV3+)<span class="status-tag">Dice 0.9914</span></div>
+            <div class="status-item"><span class="status-dot dot-green"></span>Cardiac Model (DeepLabV3+)<span class="status-tag">Dice 0.9903</span></div>
+            <div class="status-item"><span class="status-dot dot-green"></span>Prostate Model (DeepLabV3+)<span class="status-tag">Dice 0.9935</span></div>
+            <div class="status-item"><span class="status-dot dot-yellow"></span>DICOM Import<span class="status-tag">Beta</span></div>
+            <div class="status-item"><span class="status-dot dot-green"></span>Report Generator<span class="status-tag">Active</span></div>
+          </div>
+          <div class="quick-actions">
+            <h4>Quick Actions</h4>
+            <div class="quick-btn-row">
+              <button class="quick-btn" onclick="showPage('upload')">📤 Upload MRI</button>
+              <button class="quick-btn" onclick="showPage('report')">📄 View Report</button>
+              <button class="quick-btn" onclick="showPage('chatbot')">🤖 Ask AI</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-cards-row">
+        <div class="info-card info-blue">
+          <div class="info-card-icon">🧠</div>
+          <h4>Brain MRI Segmentation</h4>
+          <p>DeepLabV3+ with ResNet-50 backbone. Dice: 0.9914. Detects glioma, meningioma, and other brain tumors from 128×128 NIfTI/PNG inputs.</p>
+        </div>
+        <div class="info-card info-purple">
+          <div class="info-card-icon">❤️</div>
+          <h4>Cardiac MRI Segmentation</h4>
+          <p>DeepLabV3+ with ResNet-50 backbone. Dice: 0.9903. Assesses cardiac enlargement and cardiomegaly from 256×256 grayscale images.</p>
+        </div>
+        <div class="info-card info-cyan">
+          <div class="info-card-icon">🔵</div>
+          <h4>Prostate MRI Segmentation</h4>
+          <p>DeepLabV3+ with ResNet-50 backbone. Dice: 0.9935. Estimates prostate volume and enlargement risk from mpMRI 256×256 inputs.</p>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ════════════════════════════
+         PAGE: UPLOAD
+    ════════════════════════════ -->
+    <div id="page-upload" class="page">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Upload MRI</h1>
+          <p class="page-sub">Upload a Brain, Cardiac, or Prostate MRI image for AI segmentation.</p>
+        </div>
+      </div>
+
+      <div class="upload-layout">
+        <div class="upload-main">
+
+          <!-- Dropzone -->
+          <div class="dropzone" id="dropzone">
+            <div class="dropzone-inner" id="dropzone-inner">
+              <div class="dropzone-icon">🫁</div>
+              <div class="dropzone-title">Drop your MRI image here</div>
+              <div class="dropzone-sub">Supported: PNG, JPEG (DICOM exports), NIfTI (.nii.gz)</div>
+              <label class="btn-upload-browse">
+                Browse Files
+                <input type="file" id="file-input" accept="image/*" style="display:none"/>
+              </label>
+              <div class="dropzone-hint">Max file size: 20 MB · Recommended resolution: 256×256+</div>
+            </div>
+            <div class="dropzone-preview hidden" id="dropzone-preview">
+              <img class="preview-img" id="preview-img" src="" alt="Preview"/>
+              <div class="preview-overlay">
+                <button class="btn-change-img" id="btn-change-img">🔄 Change Image</button>
+              </div>
+              <div class="preview-meta" id="preview-meta"></div>
+            </div>
+          </div>
+
+          <!-- Scan Type -->
+          <div class="scan-type-section">
+            <h3>Organ Type</h3>
+            <p class="scan-type-hint">Please precisely select the organ type for this MRI scan.</p>
+            <div class="scan-type-grid">
+              <button class="scan-type-btn" data-type="brain" id="scan-brain">
+                <span class="scan-type-icon">🧠</span>
+                Brain
+                <div class="scan-model-tags-row">
+                  <span class="scan-model-tag tag-deeplabv3">DeepLabV3+</span>
+                  <span class="scan-model-tag tag-resnet">ResNet-50</span>
+                </div>
+              </button>
+              <button class="scan-type-btn" data-type="heart" id="scan-heart">
+                <span class="scan-type-icon">❤️</span>
+                Cardiac
+                <div class="scan-model-tags-row">
+                  <span class="scan-model-tag tag-deeplabv3">DeepLabV3+</span>
+                  <span class="scan-model-tag tag-resnet">ResNet-50</span>
+                </div>
+              </button>
+              <button class="scan-type-btn" data-type="prostate" id="scan-prostate">
+                <span class="scan-type-icon">🔵</span>
+                Prostate
+                <div class="scan-model-tags-row">
+                  <span class="scan-model-tag tag-deeplabv3">DeepLabV3+</span>
+                  <span class="scan-model-tag tag-resnet">ResNet-50</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Model Select -->
+          <div class="model-select-section">
+            <h3>Segmentation Model</h3>
+            <div class="model-select-hint">
+              <span class="model-hint-icon">ℹ️</span>
+              Choose one model independently — DeepLabV3+ Baseline uses only the baseline architecture; ResNet-50 (Trained) uses the full trained backbone. Predictions are not integrated.
+            </div>
+            <div class="model-select-grid">
+              <!-- ── DeepLabV3+ Baseline (standalone, from inference notebooks) ── -->
+              <label class="model-radio-card">
+                <input type="radio" name="model" value="deeplabv3_baseline" checked/>
+                <div class="model-card-inner model-card-deeplabv3-sel">
+                  <div class="model-card-badge badge-baseline">Baseline</div>
+                  <span class="model-icon">🟣</span>
+                  <span class="model-name">DeepLabV3+ Baseline</span>
+                  <div class="model-chip-row">
+                    <span class="model-arch-chip chip-deeplab">DeepLabV3+</span>
+                    <span class="model-arch-chip chip-aspp">ASPP</span>
+                  </div>
+                  <div class="model-feature-list">
+                    <div class="mf-item"><span class="mf-dot"></span>Baseline architecture only (no ResNet)</div>
+                    <div class="mf-item"><span class="mf-dot"></span>ASPP atrous rates 6, 12, 18</div>
+                    <div class="mf-item"><span class="mf-dot"></span>Sigmoid → threshold 0.5 → binary mask</div>
+                    <div class="mf-item"><span class="mf-dot"></span>Confidence = pred.max() × 100</div>
+                  </div>
+                  <span class="model-desc">Precisely correct predictions — standalone baseline</span>
+                  <div class="model-note-row"><span class="model-note-icon">⚡</span><span class="model-note-text">Precise boundary detection · may not capture full volume</span></div>
+                  <span class="model-perf"><span class="perf-dot" style="background:#a78bfa"></span>Brain: 0.9914 · Cardiac: 0.9903 · Prostate: 0.9935</span>
+                </div>
+              </label>
+              <!-- ── ResNet-50 Trained (separate trained model) ── -->
+              <label class="model-radio-card">
+                <input type="radio" name="model" value="resnet50_trained"/>
+                <div class="model-card-inner model-card-resnet-sel">
+                  <div class="model-card-badge badge-trained">Trained</div>
+                  <span class="model-icon">🔷</span>
+                  <span class="model-name">ResNet-50 (Trained)</span>
+                  <div class="model-chip-row">
+                    <span class="model-arch-chip chip-resnet">ResNet-50</span>
+                    <span class="model-arch-chip chip-deeplab">Backbone</span>
+                  </div>
+                  <div class="model-feature-list">
+                    <div class="mf-item"><span class="mf-dot mf-dot-blue"></span>50-layer residual backbone (trained)</div>
+                    <div class="mf-item"><span class="mf-dot mf-dot-blue"></span>Hierarchical feature extraction</div>
+                    <div class="mf-item"><span class="mf-dot mf-dot-blue"></span>BCE + Dice Loss · sigmoid threshold 0.5</div>
+                    <div class="mf-item"><span class="mf-dot mf-dot-blue"></span>Confidence = prob_map.mean() × 100</div>
+                  </div>
+                  <span class="model-desc">Full trained ResNet-50 backbone — comprehensive segmentation</span>
+                  <div class="model-note-row"><span class="model-note-icon">🎯</span><span class="model-note-text">Accurate filled regions · captures complete anatomy</span></div>
+                  <span class="model-perf"><span class="perf-dot" style="background:#38bdf8"></span>Brain: ~0.97 · Cardiac: ~0.96 · Prostate: ~0.97</span>
+                </div>
+              </label>
+              <label class="model-radio-card">
+                <input type="radio" name="model" value="unet"/>
+                <div class="model-card-inner">
+                  <span class="model-icon">🔷</span>
+                  <span class="model-name">U-Net</span>
+                  <div class="model-chip-row">
+                    <span class="model-arch-chip chip-organ">Encoder–Decoder</span>
+                    <span class="model-arch-chip" style="background:rgba(56,189,248,0.12);color:#38bdf8">Skip Concat</span>
+                  </div>
+                  <div class="model-feature-list">
+                    <div class="mf-item"><span class="mf-dot mf-dot-blue"></span>4 downsampling blocks (64→512ch)</div>
+                    <div class="mf-item"><span class="mf-dot mf-dot-blue"></span>Full encoder skip connections</div>
+                    <div class="mf-item"><span class="mf-dot mf-dot-blue"></span>Bilinear upsample + 3×3 Conv</div>
+                    <div class="mf-item"><span class="mf-dot mf-dot-blue"></span>BCE + Dice loss · σ threshold 0.5</div>
+                  </div>
+                  <span class="model-desc">Best for fine organ boundary detail</span>
+                  <span class="model-perf"><span class="perf-dot" style="background:#38bdf8"></span>Brain ~0.97 · Cardiac ~0.96 · Prostate ~0.97</span>
+                </div>
+              </label>
+              <label class="model-radio-card">
+                <input type="radio" name="model" value="segnet"/>
+                <div class="model-card-inner">
+                  <span class="model-icon">🔹</span>
+                  <span class="model-name">SegNet</span>
+                  <div class="model-chip-row">
+                    <span class="model-arch-chip chip-organ">VGG-16 Encoder</span>
+                    <span class="model-arch-chip" style="background:rgba(255,171,64,0.12);color:#ffab40">Pool-Index</span>
+                  </div>
+                  <div class="model-feature-list">
+                    <div class="mf-item"><span class="mf-dot" style="background:#ffab40"></span>VGG-16 backbone (13 conv layers)</div>
+                    <div class="mf-item"><span class="mf-dot" style="background:#ffab40"></span>MaxPool index–guided unpooling</div>
+                    <div class="mf-item"><span class="mf-dot" style="background:#ffab40"></span>No skip connections — low memory</div>
+                    <div class="mf-item"><span class="mf-dot" style="background:#ffab40"></span>Fastest inference of all 3 models</div>
+                  </div>
+                  <span class="model-desc">Speed-optimised, memory-efficient</span>
+                  <span class="model-perf"><span class="perf-dot" style="background:#ffab40"></span>Brain ~0.95 · Cardiac ~0.94 · Prostate ~0.95</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="upload-actions">
+            <button class="btn-primary btn-analyze" id="btn-analyze" disabled>🔬 Analyze MRI</button>
+            <button class="btn-outline" id="btn-clear-upload">🗑️ Clear</button>
+          </div>
+
+        </div><!-- /upload-main -->
+
+        <div class="upload-sidebar">
+          <div class="upload-tips-card">
+            <h4>📋 Upload Tips</h4>
+            <ul class="tips-list">
+              <li>Use PNG or JPEG exports from DICOM viewers.</li>
+              <li>For Brain MRI: 128×128 grayscale preferred.</li>
+              <li>For Cardiac & Prostate: 256×256 grayscale preferred.</li>
+              <li>NIfTI (.nii.gz) files are also supported for brain scans.</li>
+              <li>Ensure good contrast and minimal noise.</li>
+            </ul>
+          </div>
+          <div class="upload-tips-card">
+            <h4>🧬 How It Works</h4>
+            <div class="step-mini-list">
+              <div class="step-mini"><span class="step-num">1</span>Upload your MRI image</div>
+              <div class="step-mini"><span class="step-num">2</span>Select organ & model</div>
+              <div class="step-mini"><span class="step-num">3</span>AI segments the scan</div>
+              <div class="step-mini"><span class="step-num">4</span>View results & report</div>
+            </div>
+          </div>
+          <div class="upload-tips-card">
+            <h4>🏗️ Model Architectures</h4>
+            <div class="sidebar-model-sep-label">Independent Models — choose one</div>
+            <div class="active-model-block block-deeplabv3" style="margin-bottom:8px">
+              <div class="amblock-title">🟣 DeepLabV3+ Baseline</div>
+              <div class="mf-item" style="font-size:10px"><span class="mf-dot"></span>Standalone baseline (no ResNet)</div>
+              <div class="mf-item" style="font-size:10px"><span class="mf-dot"></span>ASPP (6,12,18) multi-scale</div>
+              <div class="mf-item" style="font-size:10px"><span class="mf-dot"></span>Confidence: pred.max()×100</div>
+            </div>
+            <div class="active-model-block block-resnet" style="margin-bottom:8px">
+              <div class="amblock-title">🔷 ResNet-50 (Trained)</div>
+              <div class="mf-item" style="font-size:10px"><span class="mf-dot mf-dot-blue"></span>Full trained 50-layer backbone</div>
+              <div class="mf-item" style="font-size:10px"><span class="mf-dot mf-dot-blue"></span>Residual skip connections</div>
+              <div class="mf-item" style="font-size:10px"><span class="mf-dot mf-dot-blue"></span>Confidence: prob_map.mean()×100</div>
+            </div>
+            <div class="sidebar-model-sep-label" style="margin-top:4px">Comparison Models</div>
+            <div class="active-model-split">
+              <div class="active-model-block" style="border-color:rgba(56,189,248,0.25)">
+                <div class="amblock-title" style="color:#38bdf8">U-Net</div>
+                <div class="mf-item" style="font-size:10px"><span class="mf-dot mf-dot-blue"></span>4 Down + 4 Up blocks</div>
+                <div class="mf-item" style="font-size:10px"><span class="mf-dot mf-dot-blue"></span>Skip concat</div>
+              </div>
+              <div class="active-model-block" style="border-color:rgba(255,171,64,0.25)">
+                <div class="amblock-title" style="color:#ffab40">SegNet</div>
+                <div class="mf-item" style="font-size:10px"><span class="mf-dot" style="background:#ffab40"></span>VGG-16 encoder</div>
+                <div class="mf-item" style="font-size:10px"><span class="mf-dot" style="background:#ffab40"></span>Pool-index upsample</div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /upload-sidebar -->
+
+      </div>
+    </div><!-- /page-upload -->
+
+
+    <!-- ════════════════════════════
+         PAGE: ANALYZING
+    ════════════════════════════ -->
+    <div id="page-analyzing" class="page">
+      <div class="analyzing-container">
+        <div class="analyzing-card">
+          <div class="scan-rings">
+            <div class="ring ring1"></div>
+            <div class="ring ring2"></div>
+            <div class="ring ring3"></div>
+            <div class="ring-center">🧬</div>
+          </div>
+          <h2 class="analyzing-title">Analyzing MRI</h2>
+          <p class="analyzing-sub" id="analyzing-step-text">Initializing pipeline...</p>
+          <div class="analyzing-progress-wrap">
+            <div class="analyzing-progress-bar" id="analyzing-progress"></div>
+          </div>
+          <div class="analyzing-steps">
+            <div class="astep" id="astep-1">⬜ Loading MRI image</div>
+            <div class="astep" id="astep-2">⬜ Preprocessing & normalization</div>
+            <div class="astep" id="astep-3">⬜ Organ type classification</div>
+            <div class="astep" id="astep-4">⬜ Running segmentation model</div>
+            <div class="astep" id="astep-5">⬜ Calculating affected area</div>
+            <div class="astep" id="astep-6">⬜ Generating visualizations</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ════════════════════════════
+         PAGE: RESULTS
+    ════════════════════════════ -->
+    <div id="page-results" class="page">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Analysis Results</h1>
+          <p class="page-sub" id="result-subtitle">—</p>
+        </div>
+        <div class="result-header-actions">
+          <button class="btn-outline" id="btn-new-scan">📤 New Scan</button>
+          <button class="btn-primary" id="btn-download-report">📄 View Report</button>
+        </div>
+      </div>
+
+      <!-- Result Banner -->
+      <div class="result-banner" id="result-banner">
+        <div class="result-banner-icon" id="result-banner-icon">✅</div>
+        <div class="result-banner-text">
+          <h3 id="result-banner-title">Analysis Complete</h3>
+          <p id="result-banner-desc">—</p>
+        </div>
+        <div class="result-confidence-badge">
+          <div class="conf-label">Confidence</div>
+          <div class="conf-value" id="conf-value">—</div>
+        </div>
+      </div>
+
+      <!-- Critical Risk Alert Box -->
+      <div class="risk-critical-alert" id="risk-critical-alert" style="display:none">
+        <div class="risk-critical-row">
+          <span class="risk-critical-icon">⚠</span>
+          <span class="risk-critical-label" id="risk-critical-label">Risk: High</span>
+          <span class="risk-level-pill risk-pill-high" id="risk-level-pill">HIGH</span>
+        </div>
+        <div class="risk-critical-row" id="risk-consult-row">
+          <span class="risk-critical-icon">⚠</span>
+          <span class="risk-consult-text" id="risk-consult-text">Immediate neurologist consultation recommended</span>
+        </div>
+      </div>
+
+      <!-- Medium / Low Risk Info Bar -->
+      <div class="risk-info-bar" id="risk-info-bar" style="display:none">
+        <span class="risk-info-icon" id="risk-info-icon">🟠</span>
+        <span class="risk-info-label" id="risk-info-label">Risk: Medium</span>
+        <span class="risk-level-pill" id="risk-info-pill">MEDIUM</span>
+        <span class="risk-info-consult" id="risk-info-consult">Follow-up imaging and specialist review advised</span>
+      </div>
+
+      <div class="results-grid">
+        <!-- Image Comparison Card -->
+        <div class="result-card">
+          <div class="result-card-header">
+            <h3>MRI Visualisation</h3>
+            <div class="view-toggle">
+              <button class="toggle-btn active" id="toggle-overlay" onclick="setView('overlay')">Overlay</button>
+              <button class="toggle-btn" id="toggle-side" onclick="setView('side')">Side by Side</button>
+              <button class="toggle-btn" id="toggle-mask" onclick="setView('mask')">Mask</button>
+            </div>
+          </div>
+          <div class="image-comparison-wrap" id="image-comparison-wrap">
+            <div class="img-panel" id="panel-original">
+              <div class="img-label">Original MRI</div>
+              <canvas class="result-canvas" id="canvas-original"></canvas>
+            </div>
+            <div class="img-panel" id="panel-processed">
+              <div class="img-label" id="processed-label">Segmented Overlay</div>
+              <canvas class="result-canvas" id="canvas-segmented"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metrics Card -->
+        <div class="result-card">
+          <div class="result-card-title">Segmentation Metrics</div>
+          <div class="metrics-list">
+            <div class="metric-item"><span class="metric-label">Status</span><span class="metric-value" id="m-detected">—</span></div>
+            <div class="metric-item"><span class="metric-label">Organ</span><span class="metric-value" id="m-organ">—</span></div>
+            <div class="metric-item"><span class="metric-label">Model</span><span class="metric-value" id="m-model">—</span></div>
+            <div class="metric-item"><span class="metric-label">Affected Area</span><span class="metric-value" id="m-area">—</span></div>
+            <div class="metric-item"><span class="metric-label">Risk Level</span><span class="metric-value" id="m-risk">—</span></div>
+            <div class="metric-item"><span class="metric-label">Dice Score</span><span class="metric-value" id="m-dice">—</span></div>
+            <div class="metric-item"><span class="metric-label">IoU</span><span class="metric-value" id="m-iou">—</span></div>
+            <div class="metric-item"><span class="metric-label">Recall</span><span class="metric-value" id="m-recall">—</span></div>
+            <div class="metric-item"><span class="metric-label">Confidence</span><span class="metric-value" id="m-conf">—</span></div>
+            <div class="metric-item"><span class="metric-label">Proc. Time</span><span class="metric-value" id="m-time">—</span></div>
+          </div>
+          <div class="area-visual">
+            <svg class="donut-svg" id="donut-svg" viewBox="0 0 120 120">
+              <circle class="donut-track" cx="60" cy="60" r="48"/>
+              <circle class="donut-fill" id="donut-fill" cx="60" cy="60" r="48"/>
+              <text class="donut-pct" id="donut-pct" x="60" y="65" text-anchor="middle">0%</text>
+              <text class="donut-sub-text" x="60" y="76" text-anchor="middle">Affected</text>
+            </svg>
+            <div class="area-legend">
+              <div class="legend-row"><span class="legend-dot dot-red"></span>Anomalous Region</div>
+              <div class="legend-row"><span class="legend-dot dot-gray"></span>Normal Tissue</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);margin-top:6px" id="result-date">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Guidance -->
+      <div class="guidance-card">
+        <div class="guidance-header">
+          <span class="guidance-icon">🏥</span>
+          <h3>Clinical Guidance</h3>
+          <span class="guidance-badge">⚕️ Non-diagnostic</span>
+        </div>
+        <div class="guidance-items" id="guidance-items"></div>
+      </div>
+
+      <!-- Histogram -->
+      <div class="result-card histogram-card">
+        <h3>Pixel Intensity Distribution</h3>
+        <canvas id="histogram-canvas" height="140"></canvas>
+      </div>
+    </div><!-- /page-results -->
+
+
+    <!-- ════════════════════════════
+         PAGE: REPORT
+    ════════════════════════════ -->
+    <div id="page-report" class="page">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Analysis Report</h1>
+          <p class="page-sub">Decision-support and screening tool, not a medical replacement</p>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn-outline" id="btn-save-pdf">💾 Save PDF</button>
+          <button class="btn-primary" id="btn-print-report">🖨️ Print Report</button>
+        </div>
+      </div>
+
+      <div class="report-preview">
+        <div class="report-doc" id="report-doc">
+          <div class="report-header-bar">
+            <div class="report-logo-row">
+              <div>
+                <p class="report-brand">MediScan AI</p>
+                <p class="report-brand-sub">AI-Powered MRI Segmentation Platform</p>
+              </div>
+            </div>
+            <div class="report-id-block">
+              <div>Report ID: <span class="report-id" id="rpt-id">—</span></div>
+              <div>Date: <span id="rpt-date">—</span></div>
+            </div>
+          </div>
+
+          <div class="report-section">
+            <div class="report-section-title">Patient Information</div>
+            <div class="report-info-grid">
+              <div class="report-info-item"><span class="rinfo-label">Patient Name</span><span class="rinfo-val" id="rpt-name">—</span></div>
+              <div class="report-info-item"><span class="rinfo-label">Age</span><span class="rinfo-val" id="rpt-age">—</span></div>
+              <div class="report-info-item"><span class="rinfo-label">Gender</span><span class="rinfo-val" id="rpt-gender">—</span></div>
+              <div class="report-info-item"><span class="rinfo-label">Email</span><span class="rinfo-val" id="rpt-email">—</span></div>
+            </div>
+          </div>
+
+          <div class="report-section">
+            <div class="report-section-title">Analysis Results</div>
+            <div class="report-info-grid">
+              <div class="report-info-item"><span class="rinfo-label">Scan Type</span><span class="rinfo-val" id="rpt-scan-type">—</span></div>
+              <div class="report-info-item"><span class="rinfo-label">Model Used</span><span class="rinfo-val" id="rpt-model">—</span></div>
+              <div class="report-info-item"><span class="rinfo-label">Anomaly Detected</span><span class="rinfo-val" id="rpt-detected">—</span></div>
+              <div class="report-info-item"><span class="rinfo-label">Affected Area</span><span class="rinfo-val" id="rpt-area">—</span></div>
+              <div class="report-info-item"><span class="rinfo-label">Risk Level</span><span class="rinfo-val" id="rpt-risk">—</span></div>
+              <div class="report-info-item"><span class="rinfo-label">Label</span><span class="rinfo-val" id="rpt-label">—</span></div>
+              <div class="report-info-item"><span class="rinfo-label">Dice Score</span><span class="rinfo-val" id="rpt-dice">—</span></div>
+              <div class="report-info-item"><span class="rinfo-label">IoU Score</span><span class="rinfo-val" id="rpt-iou">—</span></div>
+              <div class="report-info-item"><span class="rinfo-label">Recall</span><span class="rinfo-val" id="rpt-recall">—</span></div>
+              <div class="report-info-item"><span class="rinfo-label">Confidence</span><span class="rinfo-val" id="rpt-conf">—</span></div>
+              <div class="report-info-item"><span class="rinfo-label">Analysis Date</span><span class="rinfo-val" id="rpt-adate">—</span></div>
+            </div>
+          </div>
+
+          <div class="report-section">
+            <div class="report-section-title">MRI Imaging Analysis — Clinical Dashboard Panels 01–06</div>
+            <div class="report-images-grid6">
+              <div class="report-img-block">
+                <div class="report-img-label">[ 01 ] Original MRI</div>
+                <canvas class="report-canvas" id="rpt-canvas-orig" width="220" height="180"></canvas>
+              </div>
+              <div class="report-img-block">
+                <div class="report-img-label">[ 02 ] Predicted Tumor Mask</div>
+                <canvas class="report-canvas" id="rpt-canvas-mask" width="220" height="180"></canvas>
+              </div>
+              <div class="report-img-block">
+                <div class="report-img-label">[ 03 ] Segmentation Overlay</div>
+                <canvas class="report-canvas" id="rpt-canvas-seg" width="220" height="180"></canvas>
+              </div>
+              <div class="report-img-block">
+                <div class="report-img-label">[ 04 ] Contour + Bounding Box</div>
+                <canvas class="report-canvas" id="rpt-canvas-contour" width="220" height="180"></canvas>
+              </div>
+              <div class="report-img-block">
+                <div class="report-img-label">[ 05 ] Uncertainty Heatmap</div>
+                <canvas class="report-canvas" id="rpt-canvas-heat" width="220" height="180"></canvas>
+              </div>
+              <div class="report-img-block">
+                <div class="report-img-label">[ 06 ] Raw Probability Map</div>
+                <canvas class="report-canvas" id="rpt-canvas-prob" width="220" height="180"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="report-section">
+            <div class="report-section-title">Clinical Analytics Dashboard — Panels 07 · 08 · 09 · 10</div>
+            <div class="report-analytics-grid-full">
+
+              <!-- Panel 07: Intensity Distribution -->
+              <div class="report-analytics-block">
+                <div class="report-analytics-label">[ 07 ]  Intensity Distribution — Organ vs Background</div>
+                <div style="position:relative;height:190px;">
+                  <canvas id="rpt-chart-hist"></canvas>
+                </div>
+              </div>
+
+              <!-- Panel 08: Tumor Volume Follow-up Trend -->
+              <div class="report-analytics-block">
+                <div class="report-analytics-label">[ 08 ]  Volume Follow-up Trend</div>
+                <div class="report-trend-wrap" style="margin-top:0">
+                  <canvas class="report-trend-canvas" id="rpt-canvas-trend" width="600" height="160"></canvas>
+                  <div class="report-trend-labels">
+                    <span class="trend-label-item"><span class="trend-dot trend-dot-blue"></span>Volume (cc)</span>
+                    <span class="trend-label-item" id="rpt-trend-delta">—</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Panel 09: Prediction Confidence -->
+              <div class="report-analytics-block">
+                <div class="report-analytics-label">[ 09 ]  Prediction Confidence</div>
+                <div style="position:relative;height:190px;">
+                  <canvas id="rpt-chart-conf"></canvas>
+                  <div id="rpt-conf-center" style="
+                    position:absolute;top:44%;left:50%;
+                    transform:translate(-50%,-50%);
+                    font-family:monospace;font-size:24px;font-weight:800;
+                    pointer-events:none;color:#00c8aa;
+                  "></div>
+                </div>
+              </div>
+
+              <!-- Panel 10: Organ Coverage Donut -->
+              <div class="report-analytics-block">
+                <div class="report-analytics-label">[ 10 ]  Organ Coverage</div>
+                <div style="position:relative;height:190px;">
+                  <canvas id="rpt-chart-cov"></canvas>
+                  <div id="rpt-cov-center" style="
+                    position:absolute;top:38%;left:50%;
+                    transform:translate(-50%,-50%);
+                    font-family:monospace;font-size:20px;font-weight:800;
+                    pointer-events:none;color:#00c8aa;
+                  "></div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="report-section">
+            <div class="report-section-title">Clinical Recommendations</div>
+            <ul class="report-recs" id="rpt-recs"><li>No analysis performed yet. Please upload and analyse an MRI first.</li></ul>
+          </div>
+
+          <div class="report-disclaimer">
+            ⚕️ <strong>DISCLAIMER:</strong> Decision-support and screening tool, not a medical replacement.
+          </div>
+        </div>
+      </div>
+    </div><!-- /page-report -->
+
+
+    <!-- ════════════════════════════
+         PAGE: CHATBOT
+    ════════════════════════════ -->
+    <div id="page-chatbot" class="page">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">AI Assistant</h1>
+          <p class="page-sub">Ask about MRI analysis, models, results, or general MRI awareness.</p>
+        </div>
+        <div class="chatbot-status"><span style="width:8px;height:8px;background:var(--success);border-radius:50%;display:inline-block"></span>Online</div>
+      </div>
+
+      <div class="chatbot-layout">
+        <div class="chatbot-main">
+          <div class="chat-window" id="chat-window"></div>
+          <div class="chat-input-area">
+            <div class="chat-quick-prompts" id="chat-quick-prompts">
+              <button class="quick-prompt" onclick="sendQuick('How do I upload an MRI?')">How to upload?</button>
+              <button class="quick-prompt" onclick="sendQuick('What is DeepLabV3+?')">DeepLabV3+?</button>
+              <button class="quick-prompt" onclick="sendQuick('What is U-Net and how does it work?')" style="background:rgba(56,189,248,0.08);border-color:rgba(56,189,248,0.25);color:#38bdf8">U-Net?</button>
+              <button class="quick-prompt" onclick="sendQuick('What is SegNet and pooling indices?')" style="background:rgba(255,171,64,0.08);border-color:rgba(255,171,64,0.25);color:#ffab40">SegNet?</button>
+              <button class="quick-prompt" onclick="sendQuick('What is the ResNet-50 backbone?')">ResNet-50?</button>
+              <button class="quick-prompt" onclick="sendQuick('What do I do if a tumor is detected?')">Tumor found?</button>
+            </div>
+            <div class="chat-input-row">
+              <input class="chat-input" id="chat-input" placeholder="Ask me anything about MRI analysis..."/>
+              <button class="btn-send" id="btn-send">➤</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="chatbot-sidebar">
+          <div class="chat-info-card">
+            <h4>🤖 AI Assistant</h4>
+            <ul class="chat-capabilities">
+              <li>📁 How to upload MRI images</li>
+              <li>📊 Understanding results &amp; metrics</li>
+              <li>🧬 DeepLabV3+ ASPP architecture</li>
+              <li>🏗️ ResNet-50 backbone explained</li>
+              <li>🔷 U-Net skip connections &amp; encoder–decoder</li>
+              <li>🔹 SegNet pooling-index upsampling</li>
+              <li>🧠 Brain · ❤️ Cardiac · 🔵 Prostate models</li>
+              <li>📐 Dice, IoU, confidence metrics</li>
+              <li>🏥 Next steps after detection</li>
+              <li>🔬 General MRI awareness</li>
+            </ul>
+          </div>
+          <div class="chat-info-card">
+            <h4>⚕️ Medical Note</h4>
+            <p class="chat-note">⚕️ Decision-support and screening tool, not a medical replacement</p>
+          </div>
+        </div>
+      </div>
+    </div><!-- /page-chatbot -->
+
+
+    <!-- ════════════════════════════
+         PAGE: ABOUT
+    ════════════════════════════ -->
+    <div id="page-about" class="page">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">About MediScan AI</h1>
+          <p class="page-sub">Deep learning segmentation for Brain, Cardiac, and Prostate MRI.</p>
+        </div>
+      </div>
+
+      <div class="about-hero">
+        <div class="about-hero-text">
+          <h3>AI-Powered Medical Imaging Platform</h3>
+          <p>MediScan AI uses state-of-the-art DeepLabV3+ with ResNet-50 backbone to perform pixel-level segmentation on MRI scans across three organ types. The primary model achieves Dice scores above 0.99 on held-out test sets, demonstrating strong generalisation across diverse patient cohorts.</p>
+        </div>
+        <div class="about-hero-stats">
+          <div class="about-stat"><span class="about-stat-val">3</span><span>Organ Models</span></div>
+          <div class="about-stat"><span class="about-stat-val">0.99+</span><span>Dice Score</span></div>
+          <div class="about-stat"><span class="about-stat-val">256²</span><span>Input Size</span></div>
+        </div>
+      </div>
+
+      <div class="about-cards-grid">
+        <div class="about-card">
+          <div class="about-card-icon">🔬</div>
+          <h4>Segmentation Pipeline</h4>
+          <p>DeepLabV3+ with ASPP (atrous rates 6, 12, 18) captures multi-scale context. ResNet-50 backbone provides deep hierarchical features. Combined BCE + Dice loss for class-balanced training.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-card-icon">🛡️</div>
+          <h4>Privacy First</h4>
+          <p>All processing occurs client-side in your browser. No MRI images or patient data are ever uploaded to external servers. Your data never leaves your device.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-card-icon">📊</div>
+          <h4>Clinical Metrics</h4>
+          <p>Dice Coefficient, IoU (Jaccard Index), and confidence scores are computed for each analysis. Risk classification thresholds match organ-specific clinical literature guidelines.</p>
+        </div>
+      </div>
+
+      <div class="models-section">
+        <h3>Model Architecture</h3>
+        <div class="models-grid">
+          <div class="model-detail-card model-card-deeplabv3-about">
+            <div class="model-detail-icon blue">🟣</div>
+            <h4>DeepLabV3+ (Head)</h4>
+            <p>Atrous Spatial Pyramid Pooling (ASPP) with parallel dilated convolutions at rates 6, 12, 18 captures context at multiple scales. Encoder–decoder with 3×3 convolutions and bilinear upsampling for precise boundary localisation.</p>
+            <div class="model-feature-pills-row">
+              <span class="mfp mfp-purple">ASPP</span>
+              <span class="mfp mfp-purple">Multi-scale</span>
+              <span class="mfp mfp-purple">BCE+Dice Loss</span>
+              <span class="mfp mfp-purple">Threshold 0.5</span>
+            </div>
+            <div class="model-tags-row">
+              <span class="model-tag-chip">Brain: 0.9914</span>
+              <span class="model-tag-chip">Cardiac: 0.9903</span>
+              <span class="model-tag-chip">Prostate: 0.9935</span>
+            </div>
+          </div>
+          <div class="model-detail-card model-card-resnet-about">
+            <div class="model-detail-icon" style="background:rgba(14,165,233,0.1)">🔷</div>
+            <h4>ResNet-50 (Encoder)</h4>
+            <p>50-layer residual network providing hierarchical feature extraction. Residual (skip) connections prevent vanishing gradients in deep networks. Shallow layers learn low-level MRI textures; deep layers learn semantic structures.</p>
+            <div class="model-feature-pills-row">
+              <span class="mfp mfp-blue">Residual Blocks</span>
+              <span class="mfp mfp-blue">50 Layers</span>
+              <span class="mfp mfp-blue">Skip Connections</span>
+            </div>
+            <div class="model-tags-row">
+              <span class="model-tag-chip">conv1 → pool</span>
+              <span class="model-tag-chip">layer1–4</span>
+              <span class="model-tag-chip">64→512ch</span>
+            </div>
+          </div>
+          <div class="model-detail-card model-card-unet-about">
+            <div class="model-detail-icon" style="background:rgba(56,189,248,0.12)">🔷</div>
+            <h4>U-Net (Comparison)</h4>
+            <p>Encoder–decoder CNN with symmetric skip connections. The encoder contracts (64→512 channels, MaxPool) while the decoder expands via bilinear upsampling. Skip connections concatenate encoder feature maps into the decoder, preserving fine edge detail critical for organ boundary segmentation.</p>
+            <div class="model-feature-pills-row">
+              <span class="mfp mfp-blue">Skip Connections</span>
+              <span class="mfp mfp-blue">BCE+Dice Loss</span>
+              <span class="mfp mfp-blue">Fine Boundaries</span>
+              <span class="mfp mfp-blue">Bottleneck 1024ch</span>
+            </div>
+            <div class="model-tags-row">
+              <span class="model-tag-chip">Encoder 64→512ch</span>
+              <span class="model-tag-chip">4 Downsampling Blocks</span>
+              <span class="model-tag-chip">Sigmoid Output</span>
+            </div>
+          </div>
+          <div class="model-detail-card model-card-segnet-about">
+            <div class="model-detail-icon" style="background:rgba(255,171,64,0.12)">🔹</div>
+            <h4>SegNet (Comparison)</h4>
+            <p>VGG-16–based encoder saves MaxPool indices during downsampling. The symmetric decoder uses these stored indices for unpooling (no skip connections) — reconstructing spatial resolution without needing to store full encoder feature maps. Memory-efficient and fast at inference time.</p>
+            <div class="model-feature-pills-row">
+              <span class="mfp" style="background:rgba(255,171,64,0.15);color:#ffab40">Pooling Indices</span>
+              <span class="mfp" style="background:rgba(255,171,64,0.15);color:#ffab40">VGG-16 Encoder</span>
+              <span class="mfp" style="background:rgba(255,171,64,0.15);color:#ffab40">Memory-Efficient</span>
+              <span class="mfp" style="background:rgba(255,171,64,0.15);color:#ffab40">Fast Inference</span>
+            </div>
+            <div class="model-tags-row">
+              <span class="model-tag-chip">5 Pooling Stages</span>
+              <span class="model-tag-chip">Index-Guided Upsample</span>
+              <span class="model-tag-chip">No Skip Connections</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Model Comparison Table -->
+      <div class="about-comparison-section">
+        <h3>Model Architecture Comparison</h3>
+        <div class="comparison-table-wrap">
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th class="col-deeplab">DeepLabV3+ + ResNet-50</th>
+                <th class="col-unet">U-Net</th>
+                <th class="col-segnet">SegNet</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Encoder</td><td>ResNet-50 (50 layers)</td><td>Custom CNN (4 blocks)</td><td>VGG-16 (13 conv)</td></tr>
+              <tr><td>Decoder</td><td>ASPP + bilinear upsample</td><td>Upconv + skip concat</td><td>Pooling-index unpool</td></tr>
+              <tr><td>Skip Connections</td><td>✓ Encoder–decoder fusion</td><td>✓ Full skip concat</td><td>✗ Index-only</td></tr>
+              <tr><td>Multi-Scale Context</td><td>✓ ASPP (6,12,18)</td><td>✗ Single scale</td><td>✗ Single scale</td></tr>
+              <tr><td>Memory Usage</td><td>Medium–High</td><td>High</td><td>Low</td></tr>
+              <tr><td>Inference Speed</td><td>Medium</td><td>Medium</td><td>Fast</td></tr>
+              <tr><td>Fine Boundary Detail</td><td>Very High</td><td>Very High</td><td>Medium</td></tr>
+              <tr><td>Brain Dice Score</td><td class="score-high">0.9914</td><td>~0.97–0.98</td><td>~0.94–0.96</td></tr>
+              <tr><td>Cardiac Dice Score</td><td class="score-high">0.9903</td><td>~0.96–0.97</td><td>~0.93–0.95</td></tr>
+              <tr><td>Prostate Dice Score</td><td class="score-high">0.9935</td><td>~0.97–0.98</td><td>~0.94–0.96</td></tr>
+              <tr><td>Training Loss</td><td>BCE + Dice</td><td>BCE + Dice</td><td>BCE + Dice</td></tr>
+              <tr><td>Threshold</td><td>0.5 (sigmoid)</td><td>0.5 (sigmoid)</td><td>0.5 (sigmoid)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- How Inference Works -->
+      <div class="about-inference-section">
+        <h3>How Each Organ Inference Works</h3>
+        <div class="inference-cards-grid">
+          <div class="inference-card ic-brain">
+            <div class="ic-head"><span>🧠</span><h4>Brain MRI</h4></div>
+            <ul>
+              <li><strong>Input:</strong> PNG/JPG or NIfTI (.nii.gz), resized to 128×128 grayscale</li>
+              <li><strong>NIfTI handling:</strong> Loads FLAIR channel, extracts middle axial slice (z//2)</li>
+              <li><strong>Normalisation:</strong> Zero-mean unit-std per slice</li>
+              <li><strong>Model:</strong> DeepLabV3+ Baseline (also available: U-Net, SegNet)</li>
+              <li><strong>Output:</strong> Sigmoid probability map → threshold 0.5 → binary mask</li>
+              <li><strong>Risk:</strong> Area &gt;8% → High; 3–8% → Medium; &lt;3% → Low</li>
+            </ul>
+          </div>
+          <div class="inference-card ic-heart">
+            <div class="ic-head"><span>❤️</span><h4>Cardiac MRI</h4></div>
+            <ul>
+              <li><strong>Input:</strong> PNG/JPG, resized to 256×256 grayscale, normalised [0,1]</li>
+              <li><strong>Loss:</strong> BCE + Dice (custom <code>bce_dice_loss</code>)</li>
+              <li><strong>Model:</strong> DeepLabV3+ + ResNet-50 (also: U-Net, SegNet)</li>
+              <li><strong>Output:</strong> Sigmoid → threshold 0.5 → area% + volume_cc</li>
+              <li><strong>Risk:</strong> Area &gt;35% → Cardiomegaly; 20–35% → Mild; &lt;20% → Normal</li>
+              <li><strong>Confidence:</strong> prob_map.mean() × 100</li>
+            </ul>
+          </div>
+          <div class="inference-card ic-prostate">
+            <div class="ic-head"><span>🔵</span><h4>Prostate MRI</h4></div>
+            <ul>
+              <li><strong>Input:</strong> mpMRI PNG/JPG, 256×256 grayscale, normalised [0,1]</li>
+              <li><strong>Metric:</strong> Dice Coefficient with smoothing (smooth=1)</li>
+              <li><strong>Model:</strong> DeepLabV3+ + ResNet-50 (Dice: 0.9935)</li>
+              <li><strong>Output:</strong> Sigmoid → threshold 0.5 → volume_cc estimation</li>
+              <li><strong>Risk:</strong> Vol &gt;1.2cc → High; 0.8–1.2cc → Moderate; &lt;0.8cc → Normal</li>
+              <li><strong>Confidence:</strong> mean(|prob_map−0.5|)×200, capped at 99.9%</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="disclaimer-full">
+        <div class="disclaimer-full-icon">⚕️</div>
+        <div>
+          <h4>decision-support and screening tool</h4>
+          <p>decision-support and screening tool, not a medical replacement</p>
+        </div>
+      </div>
+    </div><!-- /page-about -->
+
+  </div><!-- /main-content -->
+</div><!-- /app -->
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toast-container"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
